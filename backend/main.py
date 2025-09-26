@@ -67,7 +67,7 @@ def _mk_crud(
     # CREATE
     @app.post(f"/{coll_name}", response_model=ReadModel, tags=[tag])
     async def create_obj(payload: CreateModel):
-        doc = payload.model_dump(exclude_none=True)
+        doc = payload.dict(exclude_none=True)
         if defaults:
             doc = defaults(doc)
         result = await coll.insert_one(doc)
@@ -98,7 +98,7 @@ def _mk_crud(
     # UPDATE
     @app.put(f"/{coll_name}/{{obj_id}}", response_model=Dict[str, str], tags=[tag])
     async def update_obj(obj_id: str, payload: CreateModel):
-        doc = payload.model_dump(exclude_none=True)
+        doc = payload.dict(exclude_none=True)
         res = await coll.update_one({"_id": oid(obj_id)}, {"$set": doc})
         if res.matched_count == 0:
             raise HTTPException(status_code=404, detail=f"{coll_name[:-1].capitalize()} not found")
