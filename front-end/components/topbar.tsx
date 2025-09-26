@@ -1,54 +1,54 @@
 "use client";
 import Link from "next/link";
 import React, { useState } from "react";
-import styles from "../styles/Sidebars.module.css";
-import { FaHome, FaFileAlt, FaCog, FaEnvelope, FaBell, FaUserCircle } from "react-icons/fa";
+import styles from "../styles/Topbar.module.css";
+import { FaHome, FaFileAlt, FaCog, FaEnvelope, FaBell, FaUserCircle, FaUser, FaComments } from "react-icons/fa";
 
-export default function Sidebar() {
+export default function Topbar() {
   // Use a state variable to manage the active path
   const [activePath, setActivePath] = useState("/");
   const [showNotifications, setShowNotifications] = useState(false);
 
-
   const navItems = [
     { name: "Home", path: "/", icon: <FaHome /> },
     { name: "Applications", path: "/applications", icon: <FaFileAlt /> },
-    { name: "Messaging", path: "/messages", icon: <FaEnvelope /> },
+    { name: "Resume", path: "/resume", icon: <FaUser /> },
+    { name: "Messages", path: "/messages", icon: <FaComments /> },
   ];
 
-  const bottomNavItems = [
+  const rightNavItems = [
     { name: "Notifications", path: "/notifications", icon: <FaBell />, isNotification: true },
     { name: "Profile", path: "/profile", icon: <FaUserCircle /> },
     { name: "Settings", path: "/settings", icon: <FaCog /> },
   ];
 
   return (
-    <div className={styles.sidebar}>
-      <h2 className={styles.logo}>Jopper</h2>
-      <nav className={styles.mainNav}>
-        {navItems.map((item) => (
-          <Link
-            key={item.path}
-            href={item.path}
-            onClick={() => {
-              setActivePath(item.path);
-              setShowNotifications(false);
+    <div className={styles.topbar}>
+      <div className={styles.leftSection}>
+        <h2 className={styles.logo}>Jopper</h2>
+        <nav className={styles.mainNav}>
+          {navItems.map((item) => (
+            <Link
+              key={item.path}
+              href={item.path}
+              onClick={() => {
+                setActivePath(item.path);
+                setShowNotifications(false);
+              }}
+              className={`${styles.navItem} ${
+                activePath === item.path ? styles.active : ""
+              }`}
+            >
+              {item.icon}
+              <span className={styles.navLabel}>{item.name}</span>
+            </Link>
+          ))}
+        </nav>
+      </div>
 
-            }} // Update the active path on click
-            className={`${styles.navItem} ${
-              activePath === item.path ? styles.active : ""
-            }`}
-          >
-            {item.icon}
-          </Link>
-        ))}
-      </nav>
-
-
-      <div className={styles.userNav}>
-        {bottomNavItems.map((item) =>
+      <div className={styles.rightSection}>
+        {rightNavItems.map((item) =>
           item.isNotification ? (
-            // Notification button toggles popup
             <div
               key={item.path}
               className={`${styles.navItem} ${
@@ -59,13 +59,12 @@ export default function Sidebar() {
               {item.icon}
             </div>
           ) : (
-            // Normal navigation buttons
             <Link
               key={item.path}
               href={item.path}
               onClick={() => {
                 setActivePath(item.path);
-                setShowNotifications(false); // close popup if open
+                setShowNotifications(false);
               }}
               className={`${styles.navItem} ${
                 activePath === item.path ? styles.active : ""
@@ -88,7 +87,6 @@ export default function Sidebar() {
           </ul>
         </div>
       )}
-
     </div>
   );
 }

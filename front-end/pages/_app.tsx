@@ -1,18 +1,18 @@
 // pages/_app.tsx
-import Sidebar from "../components/sidebar";
+import Topbar from "../components/topbar";
 import "../styles/globals.css";
 import { useRouter } from "next/router";
 
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
 
-  // ✅ hide sidebar on /authPage
- const hideSidebar = ["/authPage", "/employer/dashboard"].includes(router.pathname);
+  // ✅ hide topbar on /authPage
+ const hideTopbar = ["/authPage", "/employer/dashboard"].includes(router.pathname);
 
   return (
-    <div style={{ display: "flex" }}>
-      {!hideSidebar && <Sidebar />}
-      <main style={{ flex: 1, padding: "20px" }}>
+    <div style={{ minHeight: "100vh" }}>
+      {!hideTopbar && <Topbar />}
+      <main style={{ paddingTop: hideTopbar ? "0" : "84px", padding: hideTopbar ? "20px" : "84px 20px 20px" }}>
         <Component {...pageProps} />
       </main>
     </div>
