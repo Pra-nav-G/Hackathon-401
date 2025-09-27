@@ -94,7 +94,7 @@ def _mk_crud(
         d = _serialize_id(d)
         d[id_field] = d.pop("_id")
         return ReadModel(**d)
-    
+
     # UPDATE
     @app.put(f"/{coll_name}/{{obj_id}}", response_model=Dict[str, str], tags=[tag])
     async def update_obj(obj_id: str, payload: CreateModel):

@@ -21,6 +21,7 @@ class UserCreate(UserBase):
 
 class User(UserBase):
     uid: str
+
     employer_uid: Optional[int] = None
     resume_id: Optional[int] = None
 
