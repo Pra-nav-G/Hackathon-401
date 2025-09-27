@@ -1,6 +1,6 @@
 from typing import Optional, List
 from datetime import datetime
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr,Field
 
 
 
@@ -12,6 +12,7 @@ class UserBase(BaseModel):
     age: Optional[int] = None
     email: EmailStr
     company: Optional[str] = None
+    employerFlag: bool = False 
 
 
 class UserCreate(UserBase):
@@ -19,7 +20,8 @@ class UserCreate(UserBase):
 
 
 class User(UserBase):
-    uid: Optional[str] = None
+    uid: str
+
     employer_uid: Optional[int] = None
     resume_id: Optional[int] = None
 
@@ -35,13 +37,13 @@ class ResumeBase(BaseModel):
 
 
 class ResumeCreate(ResumeBase):
-    child_uid: int
+    child_uid: str
     parent_uid: Optional[int] = None
 
 
 class Resume(ResumeBase):
-    resume_id: int
-    child_uid: int
+    resume_id: str
+    child_uid: str
     parent_uid: Optional[int] = None
     created_at: datetime
     updated_at: datetime
@@ -54,21 +56,23 @@ class Resume(ResumeBase):
 # Job Posting Models
 # =========================
 class JobPostingBase(BaseModel):
-    name: str
+    title: str
     description: str
     location: str
     company: str
-    pay: float
+    salary_min: float
+    salary_max: float
 
 
 class JobPostingCreate(JobPostingBase):
-    employer_uid: int
-
+    employer_id: str  # matches what front-end sends
+    datetime: Optional[datetime] = None
+    created_at: Optional[datetime] = None
 
 class JobPosting(JobPostingBase):
-    job_id: int
+    job_id: str
     datetime: datetime
-    employer_uid: int
+    employer_id: str  # use string to match frontend
 
     class Config:
         from_attributes = True
@@ -82,16 +86,16 @@ class ApplicationBase(BaseModel):
 
 
 class ApplicationCreate(ApplicationBase):
-    job_id: int
-    user_uid: int
-    resume_id: int
+    job_id: str
+    user_uid: str
+    resume_id: str
 
 
 class Application(ApplicationBase):
-    application_id: int
-    job_id: int
-    user_uid: int
-    resume_id: int
+    application_id: str
+    job_id: str
+    user_uid: str
+    resume_id: str
     datetime: datetime
 
     class Config:
@@ -106,13 +110,13 @@ class NotificationBase(BaseModel):
 
 
 class NotificationCreate(NotificationBase):
-    from_uid: int
-    to_uid: int
+    from_uid: str
+    to_uid: str
 
 
 class Notification(NotificationBase):
     notification_id: int
-    from_uid: int
+    from_uid: str
     to_uid: int
     datetime: datetime
 

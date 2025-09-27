@@ -1,0 +1,85 @@
+
+.container {
+  max-width: 1100px;
+  margin: 2.5rem auto;
+  padding: 0 1rem;
+  font-family: 'Inter', system-ui, sans-serif;
+  color: #1f2937; /* dark slate */
+  margin-left: 50px; 
+}
+
+/* Navbar */
+.navbar {
+  display: flex;
+  justify-content: flex-end;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb; /* subtle separator */
+  background-color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.navRight {
+  display: flex;
+  align-items: center;
+  gap: 1.4rem;
+  font-size: 0.94rem;
+  color: #475569;
+}
+
+.navRight a,
+.logoutBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  text-decoration: none;
+  color: inherit;
+  padding: 0.35rem 0.7rem;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.navRight a:hover,
+.logoutBtn:hover {
+  background-color: #f3f4f6;
+  color: #2563eb; /* brand blue */
+}
+
+/* Logout button specific */
+.logoutBtn svg {
+  fill: #ef4444; /* red accent */
+}
+
+/* Applications content */
+.applicationsContent {
+  margin-top: 2rem;
+}
+
+/* Header */
+.applicationsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.8rem;
+  flex-wrap: wrap;
+}
+
+.applicationsHeader h1 {
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  flex-grow: 1;
+}
+
+/* Applications list container */
+.applicationsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}

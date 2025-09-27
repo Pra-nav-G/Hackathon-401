@@ -1,7 +1,7 @@
 from typing import List, Dict, Callable, Any
 from datetime import datetime
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException,Body
 from fastapi.middleware.cors import CORSMiddleware
 from bson import ObjectId, errors as bson_errors
 
@@ -18,18 +18,15 @@ from database import db  # Motor async client/DB
 
 app = FastAPI(title="Hackathon API")
 
-# CORS for Next.js frontend
+
 app.add_middleware(
     CORSMiddleware,
-<<<<<<< Updated upstream
-    allow_origins=["http://localhost:3000"],
-=======
-    allow_origins=["*"],   # allows all
->>>>>>> Stashed changes
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 # ---------------------
 # Helpers
@@ -70,7 +67,7 @@ def _mk_crud(
     # CREATE
     @app.post(f"/{coll_name}", response_model=ReadModel, tags=[tag])
     async def create_obj(payload: CreateModel):
-        doc = payload.model_dump(exclude_none=True)
+        doc = payload.dict(exclude_none=True)
         if defaults:
             doc = defaults(doc)
         result = await coll.insert_one(doc)
@@ -97,15 +94,11 @@ def _mk_crud(
         d = _serialize_id(d)
         d[id_field] = d.pop("_id")
         return ReadModel(**d)
-<<<<<<< Updated upstream
 
-=======
-    
->>>>>>> Stashed changes
     # UPDATE
     @app.put(f"/{coll_name}/{{obj_id}}", response_model=Dict[str, str], tags=[tag])
     async def update_obj(obj_id: str, payload: CreateModel):
-        doc = payload.model_dump(exclude_none=True)
+        doc = payload.dict(exclude_none=True)
         res = await coll.update_one({"_id": oid(obj_id)}, {"$set": doc})
         if res.matched_count == 0:
             raise HTTPException(status_code=404, detail=f"{coll_name[:-1].capitalize()} not found")
@@ -119,6 +112,56 @@ def _mk_crud(
             raise HTTPException(status_code=404, detail=f"{coll_name[:-1].capitalize()} not found")
         return {"message": "Deleted successfully"}
 
+
+# ---------------------
+# Login (Employee / Employer)
+# ---------------------
+@app.post("/login", tags=["users"])
+async def login_user(
+    email: str = Body(...),
+    password: str = Body(...),
+    user_type: str = Body(...)  # "employee" or "employer"
+):
+    # 1️⃣ Find user by email only
+    user = await db.users.find_one({"email": email})
+    if not user:
+        raise HTTPException(status_code=401, detail="No account found with this email.")
+
+    # 2️⃣ Check password
+    if user.get("password") != password:
+        raise HTTPException(status_code=401, detail="Incorrect password.")
+
+    # 3️⃣ Handle missing employerFlag (legacy users)
+    employer_flag = user.get("employerFlag", False)  # default to employee
+
+    # 4️⃣ Check if user type matches
+    if user_type == "employer" and not employer_flag:
+        raise HTTPException(
+            status_code=403,
+            detail="This account is an employee account, not an employer account."
+        )
+    if user_type == "employee" and employer_flag:
+        raise HTTPException(
+            status_code=403,
+            detail="This account is an employer account, not an employee account."
+        )
+
+    # 5️⃣ Convert ObjectId to string for frontend
+    user["_id"] = str(user["_id"])
+
+    return {
+        "message": f"Welcome back {user['name']}!",
+        "user": user
+    }
+
+@app.get("/job_postings/employer/{employer_id}")
+async def get_jobs_by_employer(employer_id: str):
+    jobs = []
+    async for job in db.job_postings.find({"employer_id": employer_id}):
+        job["_id"] = str(job["_id"])
+        job["job_id"] = job.pop("_id")
+        jobs.append(job)
+    return jobs
 # ---------------------
 # Defaults per resource
 # ---------------------
@@ -134,6 +177,19 @@ def with_created_and_dt(d: dict) -> dict:
         "datetime": d.get("datetime") or now,
         "created_at": d.get("created_at") or now,
     }
+
+def job_posting_defaults(d: dict) -> dict:
+    now = datetime.utcnow()
+    d["created_at"] = d.get("created_at") or now
+    d["datetime"] = d.get("datetime") or now
+    if "employer_id" not in d:
+        raise HTTPException(status_code=400, detail="Missing employer_id")
+    if "salary_min" not in d or "salary_max" not in d:
+        raise HTTPException(status_code=400, detail="Missing salary range")
+    return d
+
+
+
 
 # ---------------------
 # Users
@@ -165,18 +221,7 @@ _mk_crud(
     id_field="job_id",
     CreateModel=JobPostingCreate,
     ReadModel=JobPosting,
-    defaults=with_created_and_dt,
-)
-
-# ---------------------
-# Applications
-# ---------------------
-_mk_crud(
-    coll_name="applications",
-    id_field="application_id",
-    CreateModel=ApplicationCreate,
-    ReadModel=Application,
-    defaults=with_created_and_dt,
+    defaults=job_posting_defaults, 
 )
 
 # ---------------------
